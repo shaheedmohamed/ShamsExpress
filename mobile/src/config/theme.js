@@ -1,0 +1,80 @@
+export const colors = {
+  primary: '#FF6B35',
+  secondary: '#004E89',
+  accent: '#F7931E',
+  success: '#2ECC71',
+  danger: '#E74C3C',
+  warning: '#F39C12',
+  info: '#3498DB',
+  
+  background: '#F8F9FA',
+  surface: '#FFFFFF',
+  text: '#2C3E50',
+  textSecondary: '#7F8C8D',
+  border: '#E0E0E0',
+  
+  statusPending: '#F39C12',
+  statusAccepted: '#3498DB',
+  statusPickedUp: '#9B59B6',
+  statusInTransit: '#E67E22',
+  statusDelivered: '#2ECC71',
+  statusCancelled: '#E74C3C',
+};
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+};
+
+export const borderRadius = {
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  full: 9999,
+};
+
+export const fontSize = {
+  xs: 12,
+  sm: 14,
+  md: 16,
+  lg: 18,
+  xl: 20,
+  xxl: 24,
+  xxxl: 32,
+};
+
+export const fontWeight = {
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
+};
+
+export const shadows = {
+  sm: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  lg: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+};
