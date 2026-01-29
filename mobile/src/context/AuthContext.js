@@ -14,6 +14,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   async function loadStorageData() {
+    const startTime = Date.now();
+    const minDisplayTime = 2000;
+    
     try {
       const storedUser = await AsyncStorage.getItem('user');
       const storedToken = await AsyncStorage.getItem('token');
@@ -29,6 +32,13 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error('Error loading storage data:', error);
     } finally {
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = minDisplayTime - elapsedTime;
+      
+      if (remainingTime > 0) {
+        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      }
+      
       setLoading(false);
     }
   }

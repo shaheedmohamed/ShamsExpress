@@ -52,10 +52,9 @@
                                 {{ $order->delivered_to_warehouse_at->format('M j, Y H:i') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST" class="inline-flex">
+                                <form action="{{ route('admin.warehouse.assign-driver', $order->id) }}" method="POST" class="inline-flex">
                                     @csrf
-                                    <input type="hidden" name="driver_id" id="driver_{{ $order->id }}">
-                                    <select name="driver_id" class="form-select rounded-l-md border-gray-300 text-sm" onchange="document.getElementById('driver_{{ $order->id }}').value = this.value">
+                                    <select name="driver_id" class="form-select rounded-l-md border-gray-300 text-sm" required>
                                         <option value="">Select Driver</option>
                                         @foreach(App\Models\User::where('role', 'driver')->get() as $driver)
                                         <option value="{{ $driver->id }}">{{ $driver->name }}</option>
