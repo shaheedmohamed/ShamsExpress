@@ -13,7 +13,7 @@ import Button from '../components/Button';
 import { colors, spacing, fontSize, fontWeight, borderRadius, shadows } from '../config/theme';
 
 export default function ProfileScreen() {
-  const { user, signOut, updateProfile } = useAuth();
+  const { user, signOut, updateProfile, isGuest } = useAuth();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,6 +22,18 @@ export default function ProfileScreen() {
   });
 
   const handleUpdate = async () => {
+    if (isGuest) {
+      Alert.alert(
+        'Login Required',
+        'Please login to edit your profile.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Go to Login', onPress: signOut },
+        ]
+      );
+      return;
+    }
+
     setLoading(true);
     const result = await updateProfile(formData);
     setLoading(false);
@@ -54,20 +66,30 @@ export default function ProfileScreen() {
           </Text>
         </View>
         <Text style={styles.userName}>{user?.name}</Text>
-        <Text style={styles.userEmail}>{user?.email}</Text>
+        <Text style={styles.userEmail}>{isGuest ? 'Guest Mode' : user?.email}</Text>
       </View>
+
+      {isGuest && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Guest Mode</Text>
+          <Text style={styles.guestText}>
+            Login to manage your profile, create orders, and view your history.
+          </Text>
+          <Button title="Go to Login" onPress={signOut} />
+        </View>
+      )}
 
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Personal Information</Text>
-          {!editing && (
+          {!isGuest && !editing && (
             <TouchableOpacity onPress={() => setEditing(true)}>
               <Text style={styles.editButton}>Edit</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {editing ? (
+        {!isGuest && editing ? (
           <>
             <Input
               label="Name"
@@ -108,16 +130,16 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{user?.email}</Text>
+              <Text style={styles.value}>{isGuest ? '-' : user?.email}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Phone</Text>
-              <Text style={styles.value}>{user?.phone || 'Not set'}</Text>
+              <Text style={styles.value}>{isGuest ? '-' : user?.phone || 'Not set'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Role</Text>
               <Text style={[styles.value, styles.roleBadge]}>
-                {user?.role?.toUpperCase()}
+                {(user?.role || 'guest').toUpperCase()}
               </Text>
             </View>
           </>
@@ -235,5 +257,11 @@ const styles = StyleSheet.create({
   logoutButton: {
     margin: spacing.lg,
     marginBottom: spacing.xxl,
+  },
+  guestText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
   },
 });

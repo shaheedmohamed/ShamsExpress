@@ -8,12 +8,14 @@ import {
   Platform,
   Alert,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
 import Input from '../components/Input';
 import Button from '../components/Button';
 import { colors, spacing, fontSize, fontWeight } from '../config/theme';
 
 export default function CreateOrderScreen({ navigation }) {
+  const { isGuest, signOut } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     pickup_address: '',
@@ -34,6 +36,18 @@ export default function CreateOrderScreen({ navigation }) {
   };
 
   const handleSubmit = async () => {
+    if (isGuest) {
+      Alert.alert(
+        'Login Required',
+        'Please login to create a delivery order.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Go to Login', onPress: signOut },
+        ]
+      );
+      return;
+    }
+
     if (
       !formData.pickup_address ||
       !formData.delivery_address ||

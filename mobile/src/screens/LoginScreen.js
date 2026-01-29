@@ -17,7 +17,7 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, continueAsGuest } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -71,6 +71,13 @@ export default function LoginScreen({ navigation }) {
             style={styles.loginButton}
           />
 
+          <Button
+            title="Continue as Guest"
+            onPress={continueAsGuest}
+            variant="outline"
+            style={styles.guestButton}
+          />
+
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>Don't have an account? </Text>
             <Button
@@ -119,6 +126,9 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     marginTop: spacing.md,
+  },
+  guestButton: {
+    marginTop: spacing.sm,
   },
   registerContainer: {
     flexDirection: 'row',

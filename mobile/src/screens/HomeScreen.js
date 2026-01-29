@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
@@ -14,7 +15,7 @@ import OrderCard from '../components/OrderCard';
 import { colors, spacing, fontSize, fontWeight } from '../config/theme';
 
 export default function HomeScreen({ navigation }) {
-  const { user } = useAuth();
+  const { user, isGuest, signOut } = useAuth();
   const [statistics, setStatistics] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
@@ -24,6 +25,12 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   const loadData = async () => {
+    if (isGuest) {
+      setStatistics(null);
+      setRecentOrders([]);
+      return;
+    }
+
     try {
       const [stats, orders] = await Promise.all([
         orderService.getStatistics(),
@@ -64,12 +71,36 @@ export default function HomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.createOrderButton}
-        onPress={() => navigation.navigate('CreateOrder')}
+        onPress={() => {
+          if (isGuest) {
+            Alert.alert(
+              'Login Required',
+              'Please login to create a delivery order.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Go to Login', onPress: signOut },
+              ]
+            );
+            return;
+          }
+          navigation.navigate('CreateOrder');
+        }}
         activeOpacity={0.8}
       >
         <Text style={styles.createOrderIcon}>📦</Text>
-        <Text style={styles.createOrderText}>Create New Delivery Order</Text>
+        <Text style={styles.createOrderText}>
+          {isGuest ? 'Login to Create Order' : 'Create New Delivery Order'}
+        </Text>
       </TouchableOpacity>
+
+      {isGuest && (
+        <View style={styles.guestNotice}>
+          <Text style={styles.guestNoticeTitle}>Guest Mode</Text>
+          <Text style={styles.guestNoticeText}>
+            You can browse the app, but creating orders and viewing history requires login.
+          </Text>
+        </View>
+      )}
 
       {statistics && (
         <View style={styles.statsContainer}>
@@ -177,6 +208,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: fontSize.lg,
     fontWeight: fontWeight.semibold,
+  },
+  guestNotice: {
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.lg,
+    padding: spacing.lg,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  guestNoticeTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: spacing.xs,
+  },
+  guestNoticeText: {
+    fontSize: fontSize.sm,
+    color: colors.textSecondary,
   },
   statsContainer: {
     flexDirection: 'row',

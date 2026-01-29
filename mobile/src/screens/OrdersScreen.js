@@ -6,12 +6,15 @@ import {
   FlatList,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
+import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
 import OrderCard from '../components/OrderCard';
 import { colors, spacing, fontSize, fontWeight } from '../config/theme';
 
 export default function OrdersScreen({ navigation }) {
+  const { isGuest, signOut } = useAuth();
   const [orders, setOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -21,6 +24,11 @@ export default function OrdersScreen({ navigation }) {
   }, []);
 
   const loadOrders = async () => {
+    if (isGuest) {
+      setOrders([]);
+      return;
+    }
+
     try {
       const data = await orderService.getOrders();
       setOrders(data);
@@ -59,15 +67,35 @@ export default function OrdersScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {isGuest ? (
+        <View style={styles.guestContainer}>
+          <Text style={styles.guestTitle}>Login Required</Text>
+          <Text style={styles.guestText}>
+            Please login to view your orders history.
+          </Text>
+          <TouchableOpacity
+            style={styles.guestButton}
+            onPress={() => {
+              Alert.alert('Login Required', 'Go to login screen?', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Go to Login', onPress: signOut },
+              ]);
+            }}
+          >
+            <Text style={styles.guestButtonText}>Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
       <View style={styles.filterContainer}>
         <FilterButton label="All" value="all" />
         <FilterButton label="Pending" value="pending" />
         <FilterButton label="Active" value="active" />
         <FilterButton label="Completed" value="completed" />
       </View>
+      )}
 
       <FlatList
-        data={getFilteredOrders()}
+        data={isGuest ? [] : getFilteredOrders()}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <OrderCard
@@ -82,7 +110,9 @@ export default function OrdersScreen({ navigation }) {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyIcon}>📭</Text>
-            <Text style={styles.emptyText}>No orders found</Text>
+            <Text style={styles.emptyText}>
+              {isGuest ? 'Login to view orders' : 'No orders found'}
+            </Text>
           </View>
         }
       />
@@ -94,6 +124,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  guestContainer: {
+    padding: spacing.xl,
+    margin: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  guestTitle: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: spacing.sm,
+  },
+  guestText: {
+    fontSize: fontSize.md,
+    color: colors.textSecondary,
+    marginBottom: spacing.lg,
+  },
+  guestButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  guestButtonText: {
+    color: '#fff',
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.semibold,
   },
   filterContainer: {
     flexDirection: 'row',

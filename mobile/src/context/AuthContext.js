@@ -19,6 +19,11 @@ export const AuthProvider = ({ children }) => {
 
       if (storedUser && storedToken) {
         setUser(JSON.parse(storedUser));
+      } else if (storedUser && !storedToken) {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser?.is_guest) {
+          setUser(parsedUser);
+        }
       }
     } catch (error) {
       console.error('Error loading storage data:', error);
@@ -27,32 +32,26 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  async function signIn(email, password) {
-    try {
-      const response = await api.post('/login', { email, password });
-      const { user, token } = response.data;
+  async function continueAsGuest() {
+    const guestUser = {
+      id: 'guest',
+      name: 'Guest',
+      email: null,
+      phone: null,
+      role: 'guest',
+      is_guest: true,
+    };
 
-      await AsyncStorage.setItem('user', JSON.stringify(user));
-      await AsyncStorage.setItem('token', token);
-
-      setUser(user);
-      return { success: true };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Login failed',
-      };
-    }
+    await AsyncStorage.setItem('user', JSON.stringify(guestUser));
+    await AsyncStorage.removeItem('token');
+    setUser(guestUser);
   }
 
-  async function signUp(name, email, password, password_confirmation, phone) {
+  async function signIn(email, password) {
     try {
-      const response = await api.post('/register', {
-        name,
-        email,
-        password,
-        password_confirmation,
-        phone,
+      const response = await api.post('/login', {
+        email: (email || '').trim(),
+        password: (password || '').trim(),
       });
       const { user, token } = response.data;
 
@@ -62,9 +61,51 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       return { success: true };
     } catch (error) {
+      const validationErrors = error.response?.data?.errors;
+      const firstValidationMessage = validationErrors
+        ? Object.values(validationErrors)?.flat()?.[0]
+        : null;
+
       return {
         success: false,
-        message: error.response?.data?.message || 'Registration failed',
+        message:
+          firstValidationMessage ||
+          error.response?.data?.message ||
+          error.message ||
+          'Login failed',
+      };
+    }
+  }
+
+  async function signUp(name, email, password, password_confirmation, phone) {
+    try {
+      const response = await api.post('/register', {
+        name: (name || '').trim(),
+        email: (email || '').trim(),
+        password: (password || '').trim(),
+        password_confirmation: (password_confirmation || '').trim(),
+        phone: (phone || '').trim(),
+      });
+      const { user, token } = response.data;
+
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+      await AsyncStorage.setItem('token', token);
+
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      const validationErrors = error.response?.data?.errors;
+      const firstValidationMessage = validationErrors
+        ? Object.values(validationErrors)?.flat()?.[0]
+        : null;
+
+      return {
+        success: false,
+        message:
+          firstValidationMessage ||
+          error.response?.data?.message ||
+          error.message ||
+          'Registration failed',
       };
     }
   }
@@ -106,8 +147,10 @@ export const AuthProvider = ({ children }) => {
         signIn,
         signUp,
         signOut,
+        continueAsGuest,
         updateProfile,
         isAuthenticated: !!user,
+        isGuest: !!user?.is_guest,
       }}
     >
       {children}

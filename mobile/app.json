@@ -6,6 +6,9 @@
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "extra": {
+      "apiUrl": "http://127.0.0.1:8000/api"
+    },
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#FF6B35"
