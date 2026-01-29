@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "extra": {
-      "apiUrl": "http://192.168.2.3:8000/api"
+      "apiUrl": "http://10.80.130.35:8000/api"
     },
     "splash": {
       "resizeMode": "contain",

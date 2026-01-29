@@ -16,9 +16,15 @@
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="flex justify-between items-start mb-4">
                     <h3 class="font-bold text-xl">Order #{{ $order->id }}</h3>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
-                        Pending
-                    </span>
+                    @if($order->status === 'pending')
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                            Pending - Awaiting Acceptance
+                        </span>
+                    @elseif($order->status === 'accepted')
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                            Accepted
+                        </span>
+                    @endif
                 </div>
                 
                 <div class="space-y-3 mb-4">
@@ -53,12 +59,14 @@
                        class="flex-1 text-center border border-primary text-primary px-4 py-2 rounded-lg hover:bg-gray-50">
                         View Details
                     </a>
-                    <form action="{{ route('driver.orders.accept', $order->id) }}" method="POST" class="flex-1">
-                        @csrf
-                        <button type="submit" class="w-full bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90">
-                            Accept Order
-                        </button>
-                    </form>
+                    @if($order->status === 'pending')
+                        <form action="{{ route('driver.orders.accept', $order->id) }}" method="POST" class="flex-1">
+                            @csrf
+                            <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                                Accept Order
+                            </button>
+                        </form>
+                    @endif
                 </div>
             </div>
             @endforeach

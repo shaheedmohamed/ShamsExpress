@@ -25,8 +25,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     
     Route::get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
     Route::get('/orders/{id}', [AdminController::class, 'showOrder'])->name('admin.orders.show');
-    Route::post('/orders/{id}/assign-driver', [AdminController::class, 'assignDriver'])->name('admin.orders.assign-driver');
-    Route::post('/orders/{id}/update-status', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.update-status');
+    Route::post('/orders/{id}/assign-driver', [AdminController::class, 'assignDriver']);
+    Route::put('/orders/{id}/status', [AdminController::class, 'updateOrderStatus']);
+    Route::get('/warehouse/products', [AdminController::class, 'warehouseProducts']);
+    Route::post('/warehouse/orders/{id}/assign-driver', [AdminController::class, 'assignWarehouseOrderToDriver'])->name('admin.orders.update-status');
     
     Route::get('/drivers', [AdminController::class, 'drivers'])->name('admin.drivers');
 });

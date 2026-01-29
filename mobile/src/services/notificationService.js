@@ -49,7 +49,10 @@ function showOrderUpdateNotification(update) {
     accepted: '✅ Accepted by driver',
     picked_up: '📦 Picked up',
     in_transit: '🚚 In transit',
-    delivered: '✓ Delivered',
+    delivered_to_warehouse: '🏬 Delivered to warehouse',
+    warehouse_to_delivery: '📋 Ready for final delivery',
+    picked_up_from_warehouse: '📤 Picked up from warehouse',
+    delivered: '🎉 Delivered',
     cancelled: '❌ Cancelled',
   };
   
@@ -58,6 +61,9 @@ function showOrderUpdateNotification(update) {
     accepted: '✅',
     picked_up: '📦',
     in_transit: '🚚',
+    delivered_to_warehouse: '🏬',
+    warehouse_to_delivery: '📋',
+    picked_up_from_warehouse: '📤',
     delivered: '🎉',
     cancelled: '❌',
   };

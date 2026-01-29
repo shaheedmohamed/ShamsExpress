@@ -146,12 +146,11 @@ class AdminController extends Controller
 
         $order->update([
             'driver_id' => $driver->id,
-            'status' => 'accepted',
         ]);
 
         OrderStatusHistory::create([
             'order_id' => $order->id,
-            'status' => 'accepted',
+            'status' => $order->status,
             'changed_by' => auth()->id(),
             'notes' => 'Driver assigned by admin: ' . $driver->name,
         ]);
@@ -191,5 +190,41 @@ class AdminController extends Controller
         );
 
         return redirect()->back()->with('success', 'Order status updated successfully');
+    }
+
+    public function warehouseProducts()
+    {
+        $orders = DeliveryOrder::with('customer')
+            ->where('status', 'delivered_to_warehouse')
+            ->orderBy('delivered_to_warehouse_at', 'desc')
+            ->paginate(20);
+
+        return view('admin.warehouse.products', compact('orders'));
+    }
+
+    public function assignWarehouseOrderToDriver(Request $request, $id)
+    {
+        $request->validate([
+            'driver_id' => 'required|exists:users,id',
+        ]);
+
+        $order = DeliveryOrder::findOrFail($id);
+        $driver = User::where('id', $request->driver_id)
+            ->where('role', 'driver')
+            ->firstOrFail();
+
+        $order->update([
+            'driver_id' => $driver->id,
+            'status' => 'warehouse_to_delivery',
+        ]);
+
+        OrderStatusHistory::create([
+            'order_id' => $order->id,
+            'status' => 'warehouse_to_delivery',
+            'changed_by' => auth()->id(),
+            'notes' => 'Order assigned to driver for final delivery: ' . $driver->name,
+        ]);
+
+        return redirect()->back()->with('success', 'Order assigned to driver for final delivery');
     }
 }

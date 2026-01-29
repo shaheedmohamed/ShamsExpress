@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Web;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryOrder;
 use App\Models\OrderStatusHistory;
+use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 
 class DriverController extends Controller
@@ -12,6 +13,10 @@ class DriverController extends Controller
     public function dashboard()
     {
         $driver = auth()->user();
+
+        if ($driver->role !== 'driver') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
         $stats = [
             'total_deliveries' => DeliveryOrder::where('driver_id', $driver->id)->count(),
@@ -21,7 +26,9 @@ class DriverController extends Controller
             'completed_deliveries' => DeliveryOrder::where('driver_id', $driver->id)
                 ->where('status', 'delivered')
                 ->count(),
-            'available_orders' => DeliveryOrder::where('status', 'pending')->count(),
+            'pending_orders' => DeliveryOrder::where('driver_id', $driver->id)
+                ->where('status', 'pending')
+                ->count(),
         ];
 
         $activeOrders = DeliveryOrder::with('customer')
@@ -30,58 +37,64 @@ class DriverController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('driver.dashboard', compact('stats', 'activeOrders'));
+        return response()->json([
+            'stats' => $stats,
+            'active_orders' => $activeOrders,
+        ]);
     }
 
     public function availableOrders()
     {
         $driver = auth()->user();
-        
+
+        if ($driver->role !== 'driver') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $orders = DeliveryOrder::with('customer')
             ->where('driver_id', $driver->id)
             ->whereIn('status', ['pending', 'accepted'])
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
-        return view('driver.available-orders', compact('orders'));
+        return response()->json($orders);
     }
 
     public function myOrders()
     {
         $driver = auth()->user();
 
+        if ($driver->role !== 'driver') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $orders = DeliveryOrder::with('customer')
             ->where('driver_id', $driver->id)
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
-        return view('driver.my-orders', compact('orders'));
-    }
-
-    public function showOrder($id)
-    {
-        $order = DeliveryOrder::with(['customer', 'statusHistories.user'])
-            ->findOrFail($id);
-
-        return view('driver.order-details', compact('order'));
+        return response()->json($orders);
     }
 
     public function acceptOrder($id)
     {
-        $order = DeliveryOrder::findOrFail($id);
         $driver = auth()->user();
 
+        if ($driver->role !== 'driver') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $order = DeliveryOrder::findOrFail($id);
+
         if ($order->driver_id !== $driver->id) {
-            return redirect()->back()->with('error', 'This order is not assigned to you');
+            return response()->json(['message' => 'This order is not assigned to you'], 403);
         }
 
         if ($order->status !== 'pending') {
-            return redirect()->back()->with('error', 'This order is no longer available');
+            return response()->json(['message' => 'This order is no longer available'], 400);
         }
 
-        $order->update([
-            'status' => 'accepted',
-        ]);
+        $order->update(['status' => 'accepted']);
 
         OrderStatusHistory::create([
             'order_id' => $order->id,
@@ -90,21 +103,35 @@ class DriverController extends Controller
             'notes' => 'Order accepted by driver',
         ]);
 
-        return redirect()->route('driver.orders.show', $id)->with('success', 'Order accepted successfully');
+        PushNotificationService::sendOrderStatusNotification(
+            $order->customer,
+            $order,
+            'accepted'
+        );
+
+        return response()->json([
+            'message' => 'Order accepted successfully',
+            'order' => $order->load('customer'),
+        ]);
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateOrderStatus(Request $request, $id)
     {
         $request->validate([
             'status' => 'required|in:picked_up,in_transit,delivered_to_warehouse,delivered',
             'notes' => 'nullable|string',
         ]);
 
-        $order = DeliveryOrder::findOrFail($id);
         $driver = auth()->user();
 
+        if ($driver->role !== 'driver') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $order = DeliveryOrder::findOrFail($id);
+
         if ($order->driver_id !== $driver->id) {
-            return redirect()->back()->with('error', 'Unauthorized action');
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $order->status = $request->status;
@@ -125,9 +152,18 @@ class DriverController extends Controller
             'order_id' => $order->id,
             'status' => $request->status,
             'changed_by' => $driver->id,
-            'notes' => $request->notes ?? 'Status updated',
+            'notes' => $request->notes ?? 'Status updated by driver',
         ]);
 
-        return redirect()->back()->with('success', 'Order status updated successfully');
+        PushNotificationService::sendOrderStatusNotification(
+            $order->customer,
+            $order,
+            $request->status
+        );
+
+        return response()->json([
+            'message' => 'Order status updated successfully',
+            'order' => $order->load('customer'),
+        ]);
     }
 }

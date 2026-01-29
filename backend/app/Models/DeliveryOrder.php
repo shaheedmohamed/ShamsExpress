@@ -13,6 +13,9 @@ class DeliveryOrder extends Model
     const STATUS_ACCEPTED = 'accepted';
     const STATUS_PICKED_UP = 'picked_up';
     const STATUS_IN_TRANSIT = 'in_transit';
+    const STATUS_DELIVERED_TO_WAREHOUSE = 'delivered_to_warehouse';
+    const STATUS_WAREHOUSE_TO_DELIVERY = 'warehouse_to_delivery';
+    const STATUS_PICKED_UP_FROM_WAREHOUSE = 'picked_up_from_warehouse';
     const STATUS_DELIVERED = 'delivered';
     const STATUS_CANCELLED = 'cancelled';
 
@@ -32,6 +35,8 @@ class DeliveryOrder extends Model
         'status',
         'notes',
         'picked_up_at',
+        'delivered_to_warehouse_at',
+        'picked_up_from_warehouse_at',
         'delivered_at',
     ];
 
@@ -42,6 +47,8 @@ class DeliveryOrder extends Model
         'delivery_longitude' => 'decimal:8',
         'delivery_fee' => 'decimal:2',
         'picked_up_at' => 'datetime',
+        'delivered_to_warehouse_at' => 'datetime',
+        'picked_up_from_warehouse_at' => 'datetime',
         'delivered_at' => 'datetime',
     ];
 
@@ -71,6 +78,27 @@ class DeliveryOrder extends Model
             self::STATUS_ACCEPTED,
             self::STATUS_PICKED_UP,
             self::STATUS_IN_TRANSIT,
+            self::STATUS_WAREHOUSE_TO_DELIVERY,
+            self::STATUS_PICKED_UP_FROM_WAREHOUSE,
+        ]);
+    }
+
+    public function scopeInWarehouse($query)
+    {
+        return $query->where('status', self::STATUS_DELIVERED_TO_WAREHOUSE);
+    }
+
+    public function scopePendingWarehouseDelivery($query)
+    {
+        return $query->where('status', self::STATUS_WAREHOUSE_TO_DELIVERY);
+    }
+
+    public function isWarehouseStatus()
+    {
+        return in_array($this->status, [
+            self::STATUS_DELIVERED_TO_WAREHOUSE,
+            self::STATUS_WAREHOUSE_TO_DELIVERY,
+            self::STATUS_PICKED_UP_FROM_WAREHOUSE,
         ]);
     }
 
