@@ -96,6 +96,60 @@
         </div>
     </div>
     
+    @if(session('success'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Assign Driver</h2>
+            <form action="{{ route('admin.orders.assign-driver', $order->id) }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Select Driver</label>
+                    <select name="driver_id" class="w-full border border-gray-300 rounded-lg px-4 py-2" required>
+                        <option value="">Choose a driver...</option>
+                        @foreach($drivers as $driver)
+                        <option value="{{ $driver->id }}" {{ $order->driver_id == $driver->id ? 'selected' : '' }}>
+                            {{ $driver->name }} ({{ $driver->phone }})
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    Assign Driver
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Update Order Status</h2>
+            <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2" required>
+                        <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="accepted" {{ $order->status == 'accepted' ? 'selected' : '' }}>Accepted</option>
+                        <option value="picked_up" {{ $order->status == 'picked_up' ? 'selected' : '' }}>Picked Up</option>
+                        <option value="in_transit" {{ $order->status == 'in_transit' ? 'selected' : '' }}>In Transit</option>
+                        <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                        <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                    <textarea name="notes" rows="3" class="w-full border border-gray-300 rounded-lg px-4 py-2"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                    Update Status
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="bg-white rounded-lg shadow-md p-6 mt-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Status History</h2>
         <div class="space-y-3">

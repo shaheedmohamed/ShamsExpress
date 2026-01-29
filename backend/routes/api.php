@@ -11,6 +11,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::post('/user/push-token', [AuthController::class, 'savePushToken']);
     
     Route::get('/orders', [DeliveryOrderController::class, 'index']);
     Route::post('/orders', [DeliveryOrderController::class, 'store']);

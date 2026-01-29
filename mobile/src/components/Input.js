@@ -7,12 +7,14 @@ export default function Input({
   value,
   onChangeText,
   placeholder,
+  placeholderTextColor,
   secureTextEntry,
   keyboardType,
   error,
   multiline,
   numberOfLines,
   style,
+  inputStyle,
   ...props
 }) {
   return (
@@ -23,11 +25,12 @@ export default function Input({
           styles.input,
           multiline && styles.multiline,
           error && styles.inputError,
+          inputStyle,
         ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={colors.textSecondary}
+        placeholderTextColor={placeholderTextColor || colors.textSecondary}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         multiline={multiline}

@@ -85,11 +85,23 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'sometimes|string|max:255',
             'phone' => 'sometimes|string|max:20',
-            'avatar' => 'sometimes|string',
         ]);
 
-        $user->update($request->only(['name', 'phone', 'avatar']));
+        $user->update($request->only(['name', 'phone']));
 
         return response()->json($user);
+    }
+
+    public function savePushToken(Request $request)
+    {
+        $request->validate([
+            'push_token' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $user->push_token = $request->push_token;
+        $user->save();
+
+        return response()->json(['message' => 'Push token saved successfully']);
     }
 }

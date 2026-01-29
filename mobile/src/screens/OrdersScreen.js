@@ -11,6 +11,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
 import OrderCard from '../components/OrderCard';
+import { checkForOrderUpdates } from '../services/notificationService';
 import { colors, spacing, fontSize, fontWeight } from '../config/theme';
 
 export default function OrdersScreen({ navigation }) {
@@ -31,6 +32,7 @@ export default function OrdersScreen({ navigation }) {
 
     try {
       const data = await orderService.getOrders();
+      await checkForOrderUpdates(data);
       setOrders(data);
     } catch (error) {
       console.error('Error loading orders:', error);

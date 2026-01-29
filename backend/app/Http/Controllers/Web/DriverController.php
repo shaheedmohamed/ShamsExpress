@@ -35,8 +35,11 @@ class DriverController extends Controller
 
     public function availableOrders()
     {
+        $driver = auth()->user();
+        
         $orders = DeliveryOrder::with('customer')
-            ->where('status', 'pending')
+            ->where('driver_id', $driver->id)
+            ->where('status', 'accepted')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

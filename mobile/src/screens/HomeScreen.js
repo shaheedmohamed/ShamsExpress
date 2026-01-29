@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
+import { checkForOrderUpdates } from '../services/notificationService';
 import StatCard from '../components/StatCard';
 import OrderCard from '../components/OrderCard';
 import { colors, spacing, fontSize, fontWeight } from '../config/theme';
@@ -22,7 +23,24 @@ export default function HomeScreen({ navigation }) {
 
   useEffect(() => {
     loadData();
-  }, []);
+    
+    const interval = setInterval(() => {
+      if (!isGuest) {
+        checkOrdersInBackground();
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [isGuest]);
+
+  const checkOrdersInBackground = async () => {
+    try {
+      const orders = await orderService.getOrders();
+      await checkForOrderUpdates(orders);
+    } catch (error) {
+      console.error('Error checking orders:', error);
+    }
+  };
 
   const loadData = async () => {
     if (isGuest) {
@@ -36,6 +54,7 @@ export default function HomeScreen({ navigation }) {
         orderService.getStatistics(),
         orderService.getOrders(),
       ]);
+      await checkForOrderUpdates(orders);
       setStatistics(stats);
       setRecentOrders(orders.slice(0, 5));
     } catch (error) {

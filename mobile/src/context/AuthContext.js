@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../config/api';
+import { registerForPushNotificationsAsync } from '../services/notificationService';
 
 const AuthContext = createContext({});
 
@@ -59,6 +60,11 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('token', token);
 
       setUser(user);
+      
+      registerForPushNotificationsAsync().catch(err => 
+        console.error('Push notification registration failed:', err)
+      );
+      
       return { success: true };
     } catch (error) {
       const validationErrors = error.response?.data?.errors;
@@ -92,6 +98,11 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('token', token);
 
       setUser(user);
+      
+      registerForPushNotificationsAsync().catch(err => 
+        console.error('Push notification registration failed:', err)
+      );
+      
       return { success: true };
     } catch (error) {
       const validationErrors = error.response?.data?.errors;

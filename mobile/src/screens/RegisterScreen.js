@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -20,7 +21,7 @@ export default function RegisterScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, continueAsGuest } = useAuth();
 
   const handleRegister = async () => {
     if (!name || !email || !phone || !password || !confirmPassword) {
@@ -49,67 +50,80 @@ export default function RegisterScreen({ navigation }) {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join Shams Express today</Text>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={styles.form}>
           <Input
-            label="Full Name"
             value={name}
             onChangeText={setName}
-            placeholder="Enter your full name"
+            placeholder="full name"
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Input
-            label="Email"
             value={email}
             onChangeText={setEmail}
-            placeholder="Enter your email"
+            placeholder="email"
             keyboardType="email-address"
             autoCapitalize="none"
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Input
-            label="Phone Number"
             value={phone}
             onChangeText={setPhone}
-            placeholder="Enter your phone number"
+            placeholder="phone"
             keyboardType="phone-pad"
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Input
-            label="Password"
             value={password}
             onChangeText={setPassword}
-            placeholder="Enter your password"
+            placeholder="password"
             secureTextEntry
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Input
-            label="Confirm Password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            placeholder="Confirm your password"
+            placeholder="confirm password"
             secureTextEntry
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Button
-            title="Register"
+            title="SIGN UP"
             onPress={handleRegister}
             loading={loading}
             style={styles.registerButton}
+            textStyle={styles.primaryButtonText}
           />
 
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Already have an account? </Text>
-            <Button
-              title="Login"
-              onPress={() => navigation.navigate('Login')}
-              variant="secondary"
-              size="small"
-            />
-          </View>
+          <Button
+            title="SIGN IN"
+            onPress={() => navigation.navigate('Login')}
+            variant="secondary"
+            style={styles.signInButton}
+          />
+
+          <Button
+            title="Skip"
+            onPress={continueAsGuest}
+            style={styles.skipButton}
+            textStyle={styles.skipButtonText}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -119,41 +133,65 @@ export default function RegisterScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#0B3B5A',
   },
   scrollContent: {
     flexGrow: 1,
-    padding: spacing.lg,
-    paddingTop: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    paddingTop: 50,
+    paddingBottom: spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: 40,
   },
-  title: {
-    fontSize: fontSize.xxxl,
-    fontWeight: fontWeight.bold,
-    color: colors.primary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
+  logo: {
+    width: 400,
+    height: 220,
   },
   form: {
     width: '100%',
   },
+  input: {
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(255,255,255,0.5)',
+    borderWidth: 1.5,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    color: '#fff',
+    fontSize: 15,
+  },
   registerButton: {
-    marginTop: spacing.md,
+    marginTop: 20,
+    backgroundColor: '#1C5C8A',
+    borderRadius: 8,
+    paddingVertical: 16,
   },
-  loginContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
   },
-  loginText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
+  signInButton: {
+    marginTop: 12,
+    backgroundColor: '#1C5C8A',
+    borderColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 16,
+  },
+  skipButton: {
+    marginTop: 30,
+    backgroundColor: '#F2B705',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    alignSelf: 'center',
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0B3B5A',
   },
 });

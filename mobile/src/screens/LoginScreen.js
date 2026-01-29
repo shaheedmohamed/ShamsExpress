@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -41,52 +42,53 @@ export default function LoginScreen({ navigation }) {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.logo}>🚚</Text>
-          <Text style={styles.title}>Shams Express</Text>
-          <Text style={styles.subtitle}>Fast & Reliable Delivery</Text>
+          <Image
+            source={require('../../assets/logo.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
         </View>
 
         <View style={styles.form}>
           <Input
-            label="Email"
             value={email}
             onChangeText={setEmail}
-            placeholder="Enter your email"
-            keyboardType="email-address"
+            placeholder="username"
             autoCapitalize="none"
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Input
-            label="Password"
             value={password}
             onChangeText={setPassword}
-            placeholder="Enter your password"
+            placeholder="password"
             secureTextEntry
+            placeholderTextColor="rgba(255,255,255,0.75)"
+            inputStyle={styles.input}
           />
 
           <Button
-            title="Login"
+            title="SIGN IN"
             onPress={handleLogin}
             loading={loading}
             style={styles.loginButton}
+            textStyle={styles.primaryButtonText}
           />
 
           <Button
-            title="Continue as Guest"
-            onPress={continueAsGuest}
-            variant="outline"
-            style={styles.guestButton}
+            title="Create Account"
+            onPress={() => navigation.navigate('Register')}
+            variant="secondary"
+            style={styles.createAccountButton}
           />
 
-          <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
-            <Button
-              title="Register"
-              onPress={() => navigation.navigate('Register')}
-              variant="secondary"
-              size="small"
-            />
-          </View>
+          <Button
+            title="Skip"
+            onPress={continueAsGuest}
+            style={styles.skipButton}
+            textStyle={styles.skipButtonText}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -96,48 +98,65 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#0B3B5A',
   },
   scrollContent: {
     flexGrow: 1,
-    justifyContent: 'center',
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: 60,
+    paddingBottom: spacing.xl,
   },
   header: {
     alignItems: 'center',
-    marginBottom: spacing.xl,
+    marginBottom: 50,
   },
   logo: {
-    fontSize: 64,
-    marginBottom: spacing.md,
-  },
-  title: {
-    fontSize: fontSize.xxxl,
-    fontWeight: fontWeight.bold,
-    color: colors.primary,
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
+    width: 400,
+    height: 220,
   },
   form: {
     width: '100%',
   },
+  input: {
+    backgroundColor: 'transparent',
+    borderColor: 'rgba(255,255,255,0.5)',
+    borderWidth: 1.5,
+    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    color: '#fff',
+    fontSize: 15,
+  },
   loginButton: {
-    marginTop: spacing.md,
+    marginTop: 20,
+    backgroundColor: '#1C5C8A',
+    borderRadius: 8,
+    paddingVertical: 16,
   },
-  guestButton: {
-    marginTop: spacing.sm,
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
   },
-  registerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
+  createAccountButton: {
+    marginTop: 12,
+    backgroundColor: '#1C5C8A',
+    borderColor: 'rgba(255,255,255,0.3)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingVertical: 16,
   },
-  registerText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
+  skipButton: {
+    marginTop: 30,
+    backgroundColor: '#F2B705',
+    borderRadius: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    alignSelf: 'center',
+  },
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0B3B5A',
   },
 });

@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { colors } from '../config/theme';
 
 import LoginScreen from '../screens/LoginScreen';
+import SplashScreen from '../screens/SplashScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import CreateOrderScreen from '../screens/CreateOrderScreen';
@@ -114,7 +115,7 @@ export default function AppNavigator() {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return null;
+    return <SplashScreen />;
   }
 
   return (

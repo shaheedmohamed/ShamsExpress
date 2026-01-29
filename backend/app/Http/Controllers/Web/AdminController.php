@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryOrder;
+use App\Models\OrderStatusHistory;
 use App\Models\User;
+use App\Services\PushNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -112,8 +114,13 @@ class AdminController extends Controller
     {
         $order = DeliveryOrder::with(['customer', 'driver', 'statusHistories.user'])
             ->findOrFail($id);
+        
+        $drivers = User::where('role', 'driver')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.orders.show', compact('order'));
+        return view('admin.orders.show', compact('order', 'drivers'));
     }
 
     public function drivers()
@@ -124,5 +131,65 @@ class AdminController extends Controller
             ->paginate(20);
 
         return view('admin.drivers.index', compact('drivers'));
+    }
+
+    public function assignDriver(Request $request, $id)
+    {
+        $request->validate([
+            'driver_id' => 'required|exists:users,id',
+        ]);
+
+        $order = DeliveryOrder::findOrFail($id);
+        $driver = User::where('id', $request->driver_id)
+            ->where('role', 'driver')
+            ->firstOrFail();
+
+        $order->update([
+            'driver_id' => $driver->id,
+            'status' => 'accepted',
+        ]);
+
+        OrderStatusHistory::create([
+            'order_id' => $order->id,
+            'status' => 'accepted',
+            'changed_by' => auth()->id(),
+            'notes' => 'Driver assigned by admin: ' . $driver->name,
+        ]);
+
+        return redirect()->back()->with('success', 'Driver assigned successfully');
+    }
+
+    public function updateOrderStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,accepted,picked_up,in_transit,delivered,cancelled',
+            'notes' => 'nullable|string',
+        ]);
+
+        $order = DeliveryOrder::findOrFail($id);
+        $order->status = $request->status;
+
+        if ($request->status === 'picked_up') {
+            $order->picked_up_at = now();
+        } elseif ($request->status === 'delivered') {
+            $order->delivered_at = now();
+        }
+
+        $order->save();
+
+        OrderStatusHistory::create([
+            'order_id' => $order->id,
+            'status' => $request->status,
+            'changed_by' => auth()->id(),
+            'notes' => $request->notes ?? 'Status updated by admin',
+        ]);
+
+        PushNotificationService::sendOrderStatusNotification(
+            $order->customer,
+            $order,
+            $request->status
+        );
+
+        return redirect()->back()->with('success', 'Order status updated successfully');
     }
 }
