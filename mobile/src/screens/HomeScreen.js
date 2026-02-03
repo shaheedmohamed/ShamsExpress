@@ -13,7 +13,7 @@ import { orderService } from '../services/orderService';
 import { checkForOrderUpdates } from '../services/notificationService';
 import StatCard from '../components/StatCard';
 import OrderCard from '../components/OrderCard';
-import { colors, spacing, fontSize, fontWeight } from '../config/theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../config/theme';
 
 export default function HomeScreen({ navigation }) {
   const { user, isGuest, signOut } = useAuth();
@@ -43,13 +43,14 @@ export default function HomeScreen({ navigation }) {
   };
 
   const loadData = async () => {
-    if (isGuest) {
-      setStatistics(null);
-      setRecentOrders([]);
-      return;
-    }
-
     try {
+      if (isGuest) {
+        const orders = await orderService.getOrders();
+        setStatistics(null);
+        setRecentOrders(orders.slice(0, 5));
+        return;
+      }
+
       const [stats, orders] = await Promise.all([
         orderService.getStatistics(),
         orderService.getOrders(),
@@ -58,7 +59,9 @@ export default function HomeScreen({ navigation }) {
       setStatistics(stats);
       setRecentOrders(orders.slice(0, 5));
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading dashboard:', error);
+      setStatistics(null);
+      setRecentOrders([]);
     }
   };
 
@@ -90,36 +93,12 @@ export default function HomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.createOrderButton}
-        onPress={() => {
-          if (isGuest) {
-            Alert.alert(
-              'Login Required',
-              'Please login to create a delivery order.',
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Go to Login', onPress: signOut },
-              ]
-            );
-            return;
-          }
-          navigation.navigate('CreateOrder');
-        }}
+        onPress={() => navigation.navigate('CreateOrder')}
         activeOpacity={0.8}
       >
         <Text style={styles.createOrderIcon}>📦</Text>
-        <Text style={styles.createOrderText}>
-          {isGuest ? 'Login to Create Order' : 'Create New Delivery Order'}
-        </Text>
+        <Text style={styles.createOrderText}>Create New Delivery Order</Text>
       </TouchableOpacity>
-
-      {isGuest && (
-        <View style={styles.guestNotice}>
-          <Text style={styles.guestNoticeTitle}>Guest Mode</Text>
-          <Text style={styles.guestNoticeText}>
-            You can browse the app, but creating orders and viewing history requires login.
-          </Text>
-        </View>
-      )}
 
       {statistics && (
         <View style={styles.statsContainer}>
@@ -187,46 +166,47 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: spacing.lg,
+    padding: spacing.md,
     backgroundColor: colors.surface,
   },
   greeting: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     color: colors.textSecondary,
   },
   userName: {
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     color: colors.text,
   },
   profileButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: colors.primary + '20',
     alignItems: 'center',
     justifyContent: 'center',
   },
   profileIcon: {
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xl,
   },
   createOrderButton: {
     backgroundColor: colors.primary,
-    margin: spacing.lg,
-    padding: spacing.lg,
-    borderRadius: 16,
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
   createOrderIcon: {
-    fontSize: fontSize.xxl,
-    marginRight: spacing.sm,
+    fontSize: fontSize.lg,
+    marginRight: spacing.xs,
   },
   createOrderText: {
     color: '#fff',
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
   },
   guestNotice: {
     marginHorizontal: spacing.lg,
@@ -250,25 +230,25 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.sm,
+    marginBottom: spacing.sm,
   },
   section: {
-    padding: spacing.lg,
+    padding: spacing.md,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   sectionTitle: {
-    fontSize: fontSize.xl,
+    fontSize: fontSize.lg,
     fontWeight: fontWeight.bold,
     color: colors.text,
   },
   seeAll: {
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: colors.primary,
     fontWeight: fontWeight.semibold,
   },

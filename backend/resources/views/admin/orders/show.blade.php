@@ -47,9 +47,37 @@
                     @endif
                 </div>
                 
+                @if($order->shipmentType)
+                <div>
+                    <p class="text-sm text-gray-500">Shipment Type</p>
+                    <p class="font-semibold">{{ $order->shipmentType->name_en }} ({{ $order->shipmentType->name_ar }})</p>
+                </div>
+                @endif
+                
+                @if($order->deliveryZone)
+                <div>
+                    <p class="text-sm text-gray-500">Delivery Zone</p>
+                    <p class="font-semibold">{{ $order->deliveryZone->name_en }} ({{ $order->deliveryZone->name_ar }})</p>
+                </div>
+                @endif
+                
+                @if($order->sender_phone)
+                <div>
+                    <p class="text-sm text-gray-500">Sender Phone</p>
+                    <p class="font-semibold">{{ $order->sender_phone }}</p>
+                </div>
+                @endif
+                
+                @if($order->product_value)
+                <div>
+                    <p class="text-sm text-gray-500">Product Value</p>
+                    <p class="font-semibold">{{ $order->product_value }} AED</p>
+                </div>
+                @endif
+                
                 <div>
                     <p class="text-sm text-gray-500">Delivery Fee</p>
-                    <p class="font-semibold text-lg">${{ number_format($order->delivery_fee, 2) }}</p>
+                    <p class="font-semibold text-lg">{{ number_format($order->delivery_fee, 2) }} AED</p>
                 </div>
                 
                 <div>
@@ -128,6 +156,7 @@
             <h2 class="text-xl font-bold text-gray-800 mb-4">Update Order Status</h2>
             <form action="{{ route('admin.orders.update-status', $order->id) }}" method="POST">
                 @csrf
+                @method('PUT')
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
                     <select name="status" class="w-full border border-gray-300 rounded-lg px-4 py-2" required>

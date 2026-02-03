@@ -22,6 +22,8 @@ class DeliveryOrder extends Model
     protected $fillable = [
         'customer_id',
         'driver_id',
+        'shipment_type_id',
+        'delivery_zone_id',
         'pickup_address',
         'pickup_latitude',
         'pickup_longitude',
@@ -31,7 +33,9 @@ class DeliveryOrder extends Model
         'package_description',
         'recipient_name',
         'recipient_phone',
+        'sender_phone',
         'delivery_fee',
+        'product_value',
         'status',
         'notes',
         'picked_up_at',
@@ -46,6 +50,7 @@ class DeliveryOrder extends Model
         'delivery_latitude' => 'decimal:8',
         'delivery_longitude' => 'decimal:8',
         'delivery_fee' => 'decimal:2',
+        'product_value' => 'decimal:2',
         'picked_up_at' => 'datetime',
         'delivered_to_warehouse_at' => 'datetime',
         'picked_up_from_warehouse_at' => 'datetime',
@@ -60,6 +65,16 @@ class DeliveryOrder extends Model
     public function driver()
     {
         return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    public function shipmentType()
+    {
+        return $this->belongsTo(ShipmentType::class);
+    }
+
+    public function deliveryZone()
+    {
+        return $this->belongsTo(DeliveryZone::class);
     }
 
     public function statusHistories()

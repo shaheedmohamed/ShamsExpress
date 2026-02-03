@@ -6,12 +6,20 @@
     "sdkVersion": "54.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "extra": {
-      "apiUrl": "http://10.80.130.35:8000/api"
-    },
     "splash": {
       "resizeMode": "contain",
       "backgroundColor": "#FF6B35"
+    },
+    "androidStatusBar": {
+      "hidden": true,
+      "translucent": false
+    },
+    "androidNavigationBar": {
+      "visible": false,
+      "barStyle": "dark-content"
+    },
+    "extra": {
+      "apiUrl": "http://192.168.8.213:8000/api"
     },
     "assetBundlePatterns": [
       "**/*"

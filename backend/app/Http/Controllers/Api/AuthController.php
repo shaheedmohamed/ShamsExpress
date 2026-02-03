@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -64,6 +65,29 @@ class AuthController extends Controller
         ]);
     }
 
+    public function continueAsGuest(Request $request)
+    {
+        $guestName = 'Guest_' . time();
+        $guestEmail = 'guest_' . time() . '@shamsexpress.app';
+        $guestPhone = '0000' . rand(100000, 999999);
+
+        $user = User::create([
+            'name' => $guestName,
+            'email' => $guestEmail,
+            'password' => Hash::make(Str::random(32)),
+            'phone' => $guestPhone,
+            'role' => 'customer',
+            'is_guest' => true,
+        ]);
+
+        $token = $user->createToken('mobile-app')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -87,9 +111,63 @@ class AuthController extends Controller
             'phone' => 'sometimes|string|max:20',
         ]);
 
-        $user->update($request->only(['name', 'phone']));
+        $user = $request->user();
+        $user->update([
+            'name' => $request->name,
+            'phone' => $request->phone,
+        ]);
 
         return response()->json($user);
+    }
+
+    public function updatePushToken(Request $request)
+    {
+        $request->validate([
+            'push_token' => 'required|string',
+        ]);
+
+        $user = $request->user();
+        $user->update([
+            'push_token' => $request->push_token,
+        ]);
+
+        return response()->json(['message' => 'Push token updated successfully']);
+    }
+
+    public function saveAddress(Request $request)
+    {
+        $request->validate([
+            'address' => 'required|string',
+            'label' => 'nullable|string',
+        ]);
+
+        $user = $request->user();
+        $addresses = $user->saved_addresses ?? [];
+        
+        // Check if address already exists
+        $exists = false;
+        foreach ($addresses as $addr) {
+            if ($addr['address'] === $request->address) {
+                $exists = true;
+                break;
+            }
+        }
+        
+        if (!$exists) {
+            $addresses[] = [
+                'address' => $request->address,
+                'label' => $request->label ?? 'Saved Address',
+            ];
+            
+            $user->update([
+                'saved_addresses' => $addresses,
+            ]);
+        }
+
+        return response()->json([
+            'addresses' => $addresses,
+            'message' => 'Address saved successfully',
+        ]);
     }
 
     public function savePushToken(Request $request)
@@ -103,5 +181,55 @@ class AuthController extends Controller
         $user->save();
 
         return response()->json(['message' => 'Push token saved successfully']);
+    }
+
+    public function createGuestAccount(Request $request)
+    {
+        try {
+            $guestIdentifier = uniqid('guest_', true);
+            $randomEmail = 'guest_' . time() . '_' . rand(1000, 9999) . '@shamsexpress.local';
+            $randomPhone = null;
+
+            $user = User::create([
+                'name' => 'Guest User',
+                'email' => $randomEmail,
+                'password' => bcrypt(Str::random(32)),
+                'phone' => $randomPhone,
+                'role' => 'customer',
+                'is_guest' => true,
+                'guest_identifier' => $guestIdentifier,
+            ]);
+
+            $token = $user->createToken('guest-app')->plainTextToken;
+
+            return response()->json([
+                'user' => $user->load('wallet'),
+                'token' => $token,
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Guest account creation failed: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to create guest account',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function deleteAddress(Request $request, $addressId)
+    {
+        $user = $request->user();
+        $addresses = $user->saved_addresses ?? [];
+
+        $addresses = array_filter($addresses, function($addr) use ($addressId) {
+            return $addr['id'] !== $addressId;
+        });
+
+        $user->saved_addresses = array_values($addresses);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Address deleted successfully',
+            'addresses' => $user->saved_addresses,
+        ]);
     }
 }

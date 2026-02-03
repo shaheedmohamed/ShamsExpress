@@ -17,32 +17,33 @@ export default function StatCard({ icon, label, value, color = colors.primary })
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.surface,
-    borderRadius: borderRadius.lg,
-    padding: spacing.md,
+    borderRadius: borderRadius.md,
+    padding: spacing.sm,
     alignItems: 'center',
     ...shadows.sm,
     flex: 1,
     margin: spacing.xs,
+    minWidth: 70,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: borderRadius.full,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  icon: {
-    fontSize: fontSize.xxl,
-  },
-  value: {
-    fontSize: fontSize.xxl,
-    fontWeight: fontWeight.bold,
-    color: colors.text,
     marginBottom: spacing.xs,
   },
+  icon: {
+    fontSize: fontSize.xl,
+  },
+  value: {
+    fontSize: fontSize.xl,
+    fontWeight: fontWeight.bold,
+    color: colors.text,
+    marginBottom: 2,
+  },
   label: {
-    fontSize: fontSize.xs,
+    fontSize: 10,
     color: colors.textSecondary,
     textAlign: 'center',
   },

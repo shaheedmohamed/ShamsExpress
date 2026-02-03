@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { orderService } from '../services/orderService';
 import { driverService } from '../services/driverService';
-import { colors, spacing, fontSize, fontWeight } from '../config/theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../config/theme';
 
 export default function DriverOrderDetailsScreen({ route, navigation }) {
   const { orderId } = route.params;

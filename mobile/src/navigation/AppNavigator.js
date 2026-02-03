@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -18,6 +18,9 @@ import DriverDashboardScreen from '../screens/DriverDashboardScreen';
 import DriverAvailableOrdersScreen from '../screens/DriverAvailableOrdersScreen';
 import DriverMyOrdersScreen from '../screens/DriverMyOrdersScreen';
 import DriverOrderDetailsScreen from '../screens/DriverOrderDetailsScreen';
+import WalletScreen from '../screens/WalletScreen';
+import WithdrawalRequestScreen from '../screens/WithdrawalRequestScreen';
+import WithdrawalHistoryScreen from '../screens/WithdrawalHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,6 +56,16 @@ function CustomerTabs() {
           tabBarLabel: 'Orders',
           tabBarIcon: ({ color }) => (
             <Text style={{ fontSize: 24, color }}>📦</Text>
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Wallet"
+        component={WalletScreen}
+        options={{
+          tabBarLabel: 'Wallet',
+          tabBarIcon: ({ color }) => (
+            <Text style={{ fontSize: 24, color }}>💰</Text>
           ),
         }}
       />
@@ -183,12 +196,32 @@ function MainStack() {
           options={{ title: 'Order Details' }}
         />
       )}
+      <Stack.Screen
+        name="Register"
+        component={RegisterScreen}
+        options={{ title: 'Create Account' }}
+      />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{ title: 'Login' }}
+      />
+      <Stack.Screen
+        name="WithdrawalRequest"
+        component={WithdrawalRequestScreen}
+        options={{ title: 'Withdrawal Request' }}
+      />
+      <Stack.Screen
+        name="WithdrawalHistory"
+        component={WithdrawalHistoryScreen}
+        options={{ title: 'Withdrawal History' }}
+      />
     </Stack.Navigator>
   );
 }
 
 export default function AppNavigator() {
-  const { isAuthenticated, loading } = useAuth();
+  const { user, loading } = useAuth();
 
   if (loading) {
     return <SplashScreen />;
@@ -196,7 +229,16 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {isAuthenticated ? <MainStack /> : <AuthStack />}
+      <MainStack />
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+  },
+});

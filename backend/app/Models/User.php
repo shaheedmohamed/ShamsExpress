@@ -23,6 +23,12 @@ class User extends Authenticatable
         'role',
         'avatar',
         'is_active',
+        'is_guest',
+        'guest_identifier',
+        'saved_addresses',
+        'pickup_commission_rate',
+        'delivery_commission_rate',
+        'same_driver_commission_rate',
     ];
 
     protected $hidden = [
@@ -34,7 +40,14 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_active' => 'boolean',
+        'is_guest' => 'boolean',
+        'saved_addresses' => 'array',
     ];
+
+    public function wallet()
+    {
+        return $this->hasOne(Wallet::class);
+    }
 
     public function deliveryOrders()
     {
@@ -46,9 +59,19 @@ class User extends Authenticatable
         return $this->hasMany(DeliveryOrder::class, 'driver_id');
     }
 
+    public function withdrawalRequests()
+    {
+        return $this->hasMany(WithdrawalRequest::class);
+    }
+
     public function isAdmin()
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    public function isCustomer()
+    {
+        return $this->role === self::ROLE_CUSTOMER;
     }
 
     public function isDriver()
@@ -56,8 +79,24 @@ class User extends Authenticatable
         return $this->role === self::ROLE_DRIVER;
     }
 
-    public function isCustomer()
+    public function isGuest()
     {
-        return $this->role === self::ROLE_CUSTOMER;
+        return $this->is_guest === true;
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($user) {
+            if (!$user->wallet) {
+                $user->wallet()->create([
+                    'balance' => 0,
+                    'total_earnings' => 0,
+                    'total_spent' => 0,
+                    'pending_amount' => 0,
+                ]);
+            }
+        });
     }
 }

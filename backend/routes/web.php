@@ -3,6 +3,7 @@
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\DriverController;
+use App\Http\Controllers\Web\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +32,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::post('/warehouse/orders/{id}/assign-driver', [AdminController::class, 'assignWarehouseOrderToDriver'])->name('admin.warehouse.assign-driver');
     
     Route::get('/drivers', [AdminController::class, 'drivers'])->name('admin.drivers');
+    
+    Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+    Route::get('/withdrawals/{id}', [WithdrawalController::class, 'show'])->name('admin.withdrawals.show');
+    Route::post('/withdrawals/{id}/approve', [WithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
+    Route::post('/withdrawals/{id}/reject', [WithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
 });
 
 Route::middleware(['auth', 'driver'])->prefix('driver')->group(function () {

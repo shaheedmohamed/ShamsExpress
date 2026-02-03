@@ -20,5 +20,9 @@
             <i class="fas fa-truck mr-3"></i>
             Drivers
         </a>
+        <a href="{{ route('admin.withdrawals.index') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-100 {{ request()->routeIs('admin.withdrawals*') ? 'bg-gray-100 border-l-4 border-primary' : '' }}">
+            <i class="fas fa-money-bill-wave mr-3"></i>
+            Withdrawal requests
+        </a>
     </nav>
 </aside>

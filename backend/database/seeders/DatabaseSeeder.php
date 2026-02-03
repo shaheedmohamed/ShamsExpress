@@ -15,11 +15,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call(PricingSeeder::class);
+
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@shamsexpress.com',
             'password' => bcrypt('password'),
-            'phone' => '+201234567890',
+            'phone' => '+971501234567',
             'role' => 'admin',
             'is_active' => true,
         ]);
@@ -28,7 +30,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Driver One',
             'email' => 'driver@shamsexpress.com',
             'password' => bcrypt('password'),
-            'phone' => '+201234567891',
+            'phone' => '+971501234568',
             'role' => 'driver',
             'is_active' => true,
         ]);
@@ -37,7 +39,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Customer User',
             'email' => 'customer@shamsexpress.com',
             'password' => bcrypt('password'),
-            'phone' => '+201234567892',
+            'phone' => '+971501234569',
             'role' => 'customer',
             'is_active' => true,
         ]);

@@ -12,7 +12,7 @@ import { driverService } from '../services/driverService';
 import { checkForOrderUpdates } from '../services/notificationService';
 import StatCard from '../components/StatCard';
 import OrderCard from '../components/OrderCard';
-import { colors, spacing, fontSize, fontWeight } from '../config/theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../config/theme';
 
 export default function DriverDashboardScreen({ navigation }) {
   const { user } = useAuth();

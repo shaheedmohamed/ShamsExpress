@@ -120,15 +120,40 @@ export default function OrderDetailsScreen({ route, navigation }) {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>📦 Package Details</Text>
+        {order.shipment_type && (
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Shipment Type:</Text>
+            <Text style={styles.value}>{order.shipment_type.name_en} ({order.shipment_type.name_ar})</Text>
+          </View>
+        )}
+        {order.delivery_zone && (
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Delivery Zone:</Text>
+            <Text style={styles.value}>{order.delivery_zone.name_en} ({order.delivery_zone.name_ar})</Text>
+          </View>
+        )}
+        {order.sender_phone && (
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Sender Phone:</Text>
+            <Text style={styles.value}>{order.sender_phone}</Text>
+          </View>
+        )}
+        {order.product_value && (
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Product Value:</Text>
+            <Text style={styles.value}>{order.product_value} AED</Text>
+          </View>
+        )}
         {order.package_description && (
           <View style={styles.infoRow}>
             <Text style={styles.label}>Description:</Text>
             <Text style={styles.value}>{order.package_description}</Text>
           </View>
         )}
+        <View style={styles.divider} />
         <View style={styles.infoRow}>
           <Text style={styles.label}>Delivery Fee:</Text>
-          <Text style={[styles.value, styles.fee]}>${parseFloat(order.delivery_fee).toFixed(2)}</Text>
+          <Text style={[styles.value, styles.fee]}>{parseFloat(order.delivery_fee).toFixed(2)} AED</Text>
         </View>
         {order.notes && (
           <View style={styles.infoRow}>

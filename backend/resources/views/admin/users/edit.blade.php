@@ -51,13 +51,41 @@
             
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="role">Role</label>
-                <select name="role" id="role" required
+                <select name="role" id="role" required onchange="toggleCommissionFields()"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
-                    <option value="customer" {{ $user->role === 'customer' ? 'selected' : '' }}>Customer</option>
-                    <option value="driver" {{ $user->role === 'driver' ? 'selected' : '' }}>Driver</option>
-                    <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                    <option value="customer" {{ $user->role === 'customer' ? 'selected' : '' }}>Customer (عميل)</option>
+                    <option value="driver" {{ $user->role === 'driver' ? 'selected' : '' }}>Driver (سائق)</option>
+                    <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin (مدير)</option>
                 </select>
             </div>
+            
+            <div id="commissionFields" style="display: {{ $user->role === 'driver' ? 'block' : 'none' }};">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="pickup_commission_rate">Pickup Commission Rate (%)</label>
+                    <input type="number" name="pickup_commission_rate" id="pickup_commission_rate" value="{{ old('pickup_commission_rate', $user->pickup_commission_rate ?? 45) }}" step="0.01" min="0" max="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="delivery_commission_rate">Delivery Commission Rate (%)</label>
+                    <input type="number" name="delivery_commission_rate" id="delivery_commission_rate" value="{{ old('delivery_commission_rate', $user->delivery_commission_rate ?? 45) }}" step="0.01" min="0" max="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="same_driver_commission_rate">Same Driver Commission Rate (%)</label>
+                    <input type="number" name="same_driver_commission_rate" id="same_driver_commission_rate" value="{{ old('same_driver_commission_rate', $user->same_driver_commission_rate ?? 70) }}" step="0.01" min="0" max="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                </div>
+            </div>
+            
+            <script>
+                function toggleCommissionFields() {
+                    const role = document.getElementById('role').value;
+                    const commissionFields = document.getElementById('commissionFields');
+                    commissionFields.style.display = role === 'driver' ? 'block' : 'none';
+                }
+            </script>
             
             <div class="mb-4">
                 <label class="flex items-center">

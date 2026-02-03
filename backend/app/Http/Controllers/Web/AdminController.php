@@ -50,16 +50,27 @@ class AdminController extends Controller
             'password' => 'required|min:6',
             'phone' => 'required|string',
             'role' => 'required|in:admin,driver,customer',
+            'pickup_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'delivery_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'same_driver_commission_rate' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        User::create([
+        $userData = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'role' => $request->role,
             'is_active' => true,
-        ]);
+        ];
+
+        if ($request->role === 'driver') {
+            $userData['pickup_commission_rate'] = $request->pickup_commission_rate ?? 45;
+            $userData['delivery_commission_rate'] = $request->delivery_commission_rate ?? 45;
+            $userData['same_driver_commission_rate'] = $request->same_driver_commission_rate ?? 70;
+        }
+
+        User::create($userData);
 
         return redirect()->route('admin.users')->with('success', 'User created successfully');
     }
@@ -80,15 +91,26 @@ class AdminController extends Controller
             'phone' => 'required|string',
             'role' => 'required|in:admin,driver,customer',
             'is_active' => 'boolean',
+            'pickup_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'delivery_commission_rate' => 'nullable|numeric|min:0|max:100',
+            'same_driver_commission_rate' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        $user->update([
+        $userData = [
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
             'role' => $request->role,
             'is_active' => $request->has('is_active'),
-        ]);
+        ];
+
+        if ($request->role === 'driver') {
+            $userData['pickup_commission_rate'] = $request->pickup_commission_rate ?? 45;
+            $userData['delivery_commission_rate'] = $request->delivery_commission_rate ?? 45;
+            $userData['same_driver_commission_rate'] = $request->same_driver_commission_rate ?? 70;
+        }
+
+        $user->update($userData);
 
         return redirect()->route('admin.users')->with('success', 'User updated successfully');
     }
@@ -112,7 +134,7 @@ class AdminController extends Controller
 
     public function showOrder($id)
     {
-        $order = DeliveryOrder::with(['customer', 'driver', 'statusHistories.user'])
+        $order = DeliveryOrder::with(['customer', 'driver', 'statusHistories.user', 'shipmentType', 'deliveryZone'])
             ->findOrFail($id);
         
         $drivers = User::where('role', 'driver')

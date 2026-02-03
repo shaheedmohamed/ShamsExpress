@@ -7,29 +7,26 @@ import {
   RefreshControl,
   TouchableOpacity,
   Alert,
+  TextInput,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../services/orderService';
 import OrderCard from '../components/OrderCard';
 import { checkForOrderUpdates } from '../services/notificationService';
-import { colors, spacing, fontSize, fontWeight } from '../config/theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../config/theme';
 
 export default function OrdersScreen({ navigation }) {
   const { isGuest, signOut } = useAuth();
   const [orders, setOrders] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadOrders();
   }, []);
 
   const loadOrders = async () => {
-    if (isGuest) {
-      setOrders([]);
-      return;
-    }
-
     try {
       const data = await orderService.getOrders();
       await checkForOrderUpdates(data);
@@ -46,14 +43,30 @@ export default function OrdersScreen({ navigation }) {
   };
 
   const getFilteredOrders = () => {
-    if (filter === 'all') return orders;
-    if (filter === 'active') {
-      return orders.filter(o => ['accepted', 'picked_up', 'in_transit'].includes(o.status));
+    let filtered = orders;
+    
+    if (filter !== 'all') {
+      if (filter === 'active') {
+        filtered = filtered.filter(o => ['accepted', 'picked_up', 'in_transit'].includes(o.status));
+      } else if (filter === 'completed') {
+        filtered = filtered.filter(o => o.status === 'delivered');
+      } else {
+        filtered = filtered.filter(o => o.status === filter);
+      }
     }
-    if (filter === 'completed') {
-      return orders.filter(o => o.status === 'delivered');
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(o => 
+        o.id?.toString().includes(query) ||
+        o.recipient_name?.toLowerCase().includes(query) ||
+        o.recipient_phone?.includes(query) ||
+        o.delivery_address?.toLowerCase().includes(query) ||
+        o.pickup_address?.toLowerCase().includes(query)
+      );
     }
-    return orders.filter(o => o.status === filter);
+    
+    return filtered;
   };
 
   const FilterButton = ({ label, value }) => (
@@ -69,35 +82,25 @@ export default function OrdersScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {isGuest ? (
-        <View style={styles.guestContainer}>
-          <Text style={styles.guestTitle}>Login Required</Text>
-          <Text style={styles.guestText}>
-            Please login to view your orders history.
-          </Text>
-          <TouchableOpacity
-            style={styles.guestButton}
-            onPress={() => {
-              Alert.alert('Login Required', 'Go to login screen?', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Go to Login', onPress: signOut },
-              ]);
-            }}
-          >
-            <Text style={styles.guestButtonText}>Go to Login</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by Order ID, Name, Phone, or Address"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholderTextColor={colors.textSecondary}
+        />
+      </View>
+
       <View style={styles.filterContainer}>
         <FilterButton label="All" value="all" />
         <FilterButton label="Pending" value="pending" />
         <FilterButton label="Active" value="active" />
         <FilterButton label="Completed" value="completed" />
       </View>
-      )}
 
       <FlatList
-        data={isGuest ? [] : getFilteredOrders()}
+        data={getFilteredOrders()}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <OrderCard
@@ -126,6 +129,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  searchContainer: {
+    padding: spacing.md,
+    backgroundColor: colors.surface,
+  },
+  searchInput: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    fontSize: fontSize.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    color: colors.text,
   },
   guestContainer: {
     padding: spacing.xl,

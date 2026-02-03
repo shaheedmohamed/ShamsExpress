@@ -56,13 +56,41 @@
             
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="role">Role</label>
-                <select name="role" id="role" required
+                <select name="role" id="role" required onchange="toggleCommissionFields()"
                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
-                    <option value="customer">Customer</option>
-                    <option value="driver">Driver</option>
-                    <option value="admin">Admin</option>
+                    <option value="customer">Customer (عميل)</option>
+                    <option value="driver">Driver (سائق)</option>
+                    <option value="admin">Admin (مدير)</option>
                 </select>
             </div>
+            
+            <div id="commissionFields" style="display: none;">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="pickup_commission_rate">Pickup Commission Rate (%)</label>
+                    <input type="number" name="pickup_commission_rate" id="pickup_commission_rate" value="45" step="0.01" min="0" max="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="delivery_commission_rate">Delivery Commission Rate (%)</label>
+                    <input type="number" name="delivery_commission_rate" id="delivery_commission_rate" value="45" step="0.01" min="0" max="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="same_driver_commission_rate">Same Driver Commission Rate (%)</label>
+                    <input type="number" name="same_driver_commission_rate" id="same_driver_commission_rate" value="70" step="0.01" min="0" max="100"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500">
+                </div>
+            </div>
+            
+            <script>
+                function toggleCommissionFields() {
+                    const role = document.getElementById('role').value;
+                    const commissionFields = document.getElementById('commissionFields');
+                    commissionFields.style.display = role === 'driver' ? 'block' : 'none';
+                }
+            </script>
             
             <div class="flex justify-end">
                 <button type="submit" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-opacity-90">

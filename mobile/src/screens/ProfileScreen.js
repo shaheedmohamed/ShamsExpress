@@ -12,7 +12,7 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 import { colors, spacing, fontSize, fontWeight, borderRadius, shadows } from '../config/theme';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const { user, signOut, updateProfile, isGuest } = useAuth();
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,18 +22,6 @@ export default function ProfileScreen() {
   });
 
   const handleUpdate = async () => {
-    if (isGuest) {
-      Alert.alert(
-        'Login Required',
-        'Please login to edit your profile.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Go to Login', onPress: signOut },
-        ]
-      );
-      return;
-    }
-
     setLoading(true);
     const result = await updateProfile(formData);
     setLoading(false);
@@ -44,6 +32,17 @@ export default function ProfileScreen() {
     } else {
       Alert.alert('Error', result.message);
     }
+  };
+
+  const handleUpgradeAccount = () => {
+    Alert.alert(
+      'Create Real Account',
+      'Would you like to create a real account? Your orders and data will be preserved.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Create Account', onPress: () => navigation.navigate('Register') },
+      ]
+    );
   };
 
   const handleLogout = () => {
@@ -70,26 +69,30 @@ export default function ProfileScreen() {
       </View>
 
       {isGuest && (
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Guest Mode</Text>
+        <View style={styles.guestCard}>
+          <Text style={styles.guestCardTitle}>🎭 Guest Account</Text>
           <Text style={styles.guestText}>
-            Login to manage your profile, create orders, and view your history.
+            You're using a guest account. Create a real account to secure your data and access it from any device.
           </Text>
-          <Button title="Go to Login" onPress={signOut} />
+          <Button 
+            title="Create Real Account" 
+            onPress={handleUpgradeAccount}
+            style={styles.upgradeButton}
+          />
         </View>
       )}
 
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Personal Information</Text>
-          {!isGuest && !editing && (
+          {!editing && (
             <TouchableOpacity onPress={() => setEditing(true)}>
               <Text style={styles.editButton}>Edit</Text>
             </TouchableOpacity>
           )}
         </View>
 
-        {!isGuest && editing ? (
+        {editing ? (
           <>
             <Input
               label="Name"
@@ -130,11 +133,11 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{isGuest ? '-' : user?.email}</Text>
+              <Text style={styles.value}>{user?.email}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Phone</Text>
-              <Text style={styles.value}>{isGuest ? '-' : user?.phone || 'Not set'}</Text>
+              <Text style={styles.value}>{user?.phone || 'Not set'}</Text>
             </View>
             <View style={styles.infoRow}>
               <Text style={styles.label}>Role</Text>
@@ -145,6 +148,23 @@ export default function ProfileScreen() {
           </>
         )}
       </View>
+
+      {user?.saved_addresses && user.saved_addresses.length > 0 && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>📍 Saved Addresses</Text>
+          {user.saved_addresses.map((addr, index) => (
+            <View key={index} style={styles.addressItem}>
+              <View style={styles.addressHeader}>
+                <Text style={styles.addressLabel}>{addr.label || `Address ${index + 1}`}</Text>
+              </View>
+              <Text style={styles.addressText}>{addr.address}</Text>
+              {addr.customer_name && (
+                <Text style={styles.customerName}>Customer: {addr.customer_name}</Text>
+              )}
+            </View>
+          ))}
+        </View>
+      )}
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>App Information</Text>
@@ -158,12 +178,14 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      <Button
-        title="Logout"
-        onPress={handleLogout}
-        variant="outline"
-        style={styles.logoutButton}
-      />
+      {!isGuest && (
+        <Button
+          title="Logout"
+          onPress={handleLogout}
+          variant="outline"
+          style={styles.logoutButton}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -175,38 +197,39 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.primary,
-    padding: spacing.xxl,
+    padding: spacing.lg,
     alignItems: 'center',
   },
   avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   avatarText: {
-    fontSize: fontSize.xxxl,
+    fontSize: fontSize.xxl,
     fontWeight: fontWeight.bold,
     color: colors.primary,
   },
   userName: {
-    fontSize: fontSize.xxl,
+    fontSize: fontSize.xl,
     fontWeight: fontWeight.bold,
     color: '#fff',
-    marginBottom: spacing.xs,
+    marginBottom: 4,
   },
   userEmail: {
-    fontSize: fontSize.md,
+    fontSize: fontSize.sm,
     color: '#fff',
     opacity: 0.9,
   },
   card: {
     backgroundColor: colors.surface,
-    margin: spacing.lg,
-    padding: spacing.lg,
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.sm,
+    padding: spacing.md,
     borderRadius: borderRadius.lg,
     ...shadows.sm,
   },
@@ -214,11 +237,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   cardTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: fontWeight.semibold,
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
     color: colors.text,
   },
   editButton: {
@@ -229,18 +252,18 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   label: {
-    fontSize: fontSize.sm,
+    fontSize: fontSize.xs,
     color: colors.textSecondary,
   },
   value: {
     fontSize: fontSize.sm,
     color: colors.text,
-    fontWeight: fontWeight.medium,
+    fontWeight: fontWeight.semibold,
   },
   roleBadge: {
     color: colors.primary,
@@ -248,20 +271,64 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.md,
+    gap: spacing.sm,
+    marginTop: spacing.sm,
   },
   button: {
     flex: 1,
   },
   logoutButton: {
-    margin: spacing.lg,
-    marginBottom: spacing.xxl,
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.lg,
   },
   guestText: {
     fontSize: fontSize.sm,
     color: colors.textSecondary,
     marginTop: spacing.sm,
     marginBottom: spacing.md,
+  },
+  guestCard: {
+    backgroundColor: '#FFF3E0',
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.sm,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+  },
+  guestCardTitle: {
+    fontSize: fontSize.md,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  upgradeButton: {
+    marginTop: spacing.xs,
+  },
+  addressItem: {
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  addressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  addressLabel: {
+    fontSize: fontSize.sm,
+    fontWeight: fontWeight.bold,
+    color: colors.primary,
+  },
+  addressText: {
+    fontSize: fontSize.xs,
+    color: colors.text,
+    marginBottom: 2,
+  },
+  customerName: {
+    fontSize: fontSize.xs,
+    color: colors.textSecondary,
+    fontStyle: 'italic',
   },
 });

@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { colors, spacing, fontSize, fontWeight } from '../config/theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../config/theme';
 
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');

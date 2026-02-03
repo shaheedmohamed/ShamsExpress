@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import Input from '../components/Input';
 import Button from '../components/Button';
-import { colors, spacing, fontSize, fontWeight } from '../config/theme';
+import { colors, spacing, fontSize, fontWeight, borderRadius } from '../config/theme';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -84,7 +84,7 @@ export default function LoginScreen({ navigation }) {
           />
 
           <Button
-            title="Skip"
+            title="Login as Guest"
             onPress={continueAsGuest}
             style={styles.skipButton}
             textStyle={styles.skipButtonText}
